@@ -3,19 +3,21 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
 class BaseFile {
 private:
 	string name;
-	
+
 public:
 	BaseFile(string name);
 	string getName() const;
 	void setName(string newName);
 	virtual int getSize() = 0;
-	
+	virtual bool isFile() = 0;
 };
 
 class File : public BaseFile {
@@ -25,7 +27,8 @@ private:
 public:
 	File(string name, int size); // Constructor
 	int getSize(); // Return the size of the file
-	
+	bool isFile();
+
 };
 
 class Directory : public BaseFile {
@@ -45,7 +48,7 @@ public:
 	vector<BaseFile*> getChildren(); // Return children
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
-	
+	bool isFile();
 };
 
 #endif

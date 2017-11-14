@@ -2,6 +2,7 @@
 #define COMMANDS_H_
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include "FileSystem.h"
 using namespace std;

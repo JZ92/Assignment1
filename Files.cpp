@@ -41,25 +41,46 @@ void Directory:: addFile(BaseFile* file)
     children.push_back(file);
 }
 
+void removeAll (Directory * target)
+{
+    vector <BaseFile*> :: iterator myIt;
+    for (myIt=target->getChildren().begin() ; myIt!=target->getChildren().end() ; myIt++)
+    {
+        if ((**myIt).isFile())
+            (target->removeFile(**myIt))
+        else
+            removeAll(**myIt);
+    }
+}
+
 void Directory:: removeFile(string name)
 {
+    int i(0);
     vector<BaseFile*>::iterator myIt;
-    int i=0;
     for(myIt=children.begin(); myIt!=children.end() ; myIt++,i++) {
-        if ((*children.at(i)).getName().compare(name)==0)
-            children.erase(children.begin()+i);
+        if ((**myIt).getName().compare(name)==0) {
+            if ((**myIt).isFile())
+            children.erase(children.begin() + i);
+            else
+                removeAll(**myIt);
+        }
     }
 }
 
 void Directory:: removeFile(BaseFile* file)
 {
-    vector<BaseFile*>::iterator myIt;
-    int i=0;
-    for(myIt=children.begin(); myIt!=children.end() ; myIt++,i++) {
-        if (children.at(i)==file)
-            children.erase(children.begin()+i);
+        int i(0);
+        vector<BaseFile*>::iterator myIt;
+        for(myIt=children.begin(); myIt!=children.end() ; myIt++,i++) {
+            if ((**myIt)==file) {
+                if ((**myIt).isFile())
+                    children.erase(children.begin() + i);
+                else
+                    removeAll(**myIt);
+            }
     }
 }
+
 bool sortAlpha( BaseFile *a, BaseFile *b)
 {
     return (((*a).getName())<((*b).getName()));

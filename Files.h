@@ -18,6 +18,7 @@ public:
 	void setName(string newName);
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
+	virtual ~BaseFile();
 };
 
 class File : public BaseFile {
@@ -25,8 +26,8 @@ private:
 	int size;
 
 public:
-	File(string name, int size); // Constructor
-	int getSize(); // Return the size of the file
+	File(string name, int size);
+	int getSize();
 	bool isFile();
 
 };
@@ -49,6 +50,9 @@ public:
 	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
 	bool isFile();
+	~Directory();
+	void clear();
+	Directory(const Directory & other);
 };
 
 #endif

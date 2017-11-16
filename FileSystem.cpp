@@ -1,10 +1,6 @@
 #include "../include/FileSystem.h"
 
-FileSystem:: FileSystem()
-{
-    rootDirectory=nullptr;
-    workingDirectory= nullptr;
-}
+FileSystem:: FileSystem() : rootDirectory(new Directory("", nullptr)), workingDirectory(rootDirectory) {}
 
 Directory& FileSystem:: getRootDirectory() const
 {

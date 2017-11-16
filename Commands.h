@@ -25,7 +25,7 @@ private:
 public:
 	PwdCommand(string args);
 	void execute(FileSystem & fs); // Every derived class should implement this function according to the document (pdf)
-	virtual string toString();
+	string toString();
 };
 
 class CdCommand : public BaseCommand {

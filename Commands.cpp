@@ -13,19 +13,19 @@ Directory * goTo (Directory * location, string args)
             sub = args.substr(0, found);
 
         if (sub == "..") {
-            if ((location&).getParent() == nullptr) {
+            if (location->getParent() == nullptr) {
                 return nullptr;
             }
             else
-                (location&)=(location&).getParent();
+                location=location->getParent();
         } else {
             vector<BaseFile *>::iterator myIt;
             bool found2 = false;
-            for (myIt = (location&).getChildren().begin();
-                 myIt != (location&).getChildren().end(); myIt++) {
+            for (myIt = location->getChildren().begin();
+                 myIt != location->getChildren().end(); myIt++) {
                 if (sub.compare((**myIt).getName()) == 0 && !((**myIt).isFile()))
                 {
-                    location=**myIt;
+                    location=(***myIt);
                     found2 = true;
                 }
             }
@@ -43,9 +43,7 @@ Directory * goTo (Directory * location, string args)
 
 BaseCommand:: BaseCommand(string args) : args(args) {}
 
-string BaseCommand:: getArgs()ExecCommand(string args, const vector<BaseCommand *> & history);
-	void execute(FileSystem & fs);
-	string toString();
+string BaseCommand:: getArgs()
 {
     return args;
 }
@@ -155,7 +153,7 @@ void LsCommand:: execute(FileSystem & fs)
             space=sub.find(' ');
             sub=sub.substr(0,space);
             sizeW=sub.substr(space+1);
-            size=atoi(sizeW);
+            size=atoi(sizeW.c_str());
             path=args.substr(0,found);
         }
         else
@@ -163,7 +161,7 @@ void LsCommand:: execute(FileSystem & fs)
             space=args.find_last_of(' ');
             sub=args.substr(0,space);
             sizeW=sub.substr(space+1);
-            size=atoi(sizeW);
+            size=atoi(sizeW.c_str());
             path=args.substr(0,space);
         }
         Directory * location;
@@ -229,7 +227,7 @@ void LsCommand:: execute(FileSystem & fs)
                 for (myIt = location->getChildren().begin(); myIt != location->getChildren().end() && !found; myIt++) {
                     if ((**myIt).getName().compare(name) == 0) {
                         found = true;
-                        if ((**myIt).isFile) {
+                        if ((**myIt).isFile()) {
                             size = (**myIt).getSize();
                             fileName = (**myIt).getName();
                         } else {
@@ -387,7 +385,7 @@ void LsCommand:: execute(FileSystem & fs)
                         (**myIt).setName(name2);
                     else
                     {
-                        if((**myIt)==fs.getWorkingDirectory())
+                        if((**myIt)==&fs.getWorkingDirectory())
                             cout << "Can't rename the working directory";
                         else
                             (**myIt).setName(name2);
@@ -469,14 +467,14 @@ void LsCommand:: execute(FileSystem & fs)
             args=args.substr(0,space);
         cout << args << ": Unknown command";
     }
-    string ErrorCommand:: toString() {return "error"}
+    string ErrorCommand:: toString() {return "error";}
 
     ExecCommand:: ExecCommand(string args, const vector<BaseCommand *> & history):BaseCommand(args),history(history) {}
 
     void ExecCommand:: execute(FileSystem & fs)
     {
         string args=getArgs();
-        int a =atoi(args.substr(5));
+        int a =atoi((args.substr(5)).c_str());
         if (a>=history.size())
             cout << "Command not found";
         else

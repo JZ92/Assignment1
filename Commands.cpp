@@ -113,7 +113,7 @@ void LsCommand:: execute(FileSystem & fs)
     if (current== nullptr)
         cout << "The system cannot find the path specified";
     else {
-        if (sortBySize)    // SAME SIZE ISSUE (JONATHAN)
+        if (sortBySize)
             (*current).sortBySize();
         else
             (*current).sortByName();

@@ -11,21 +11,18 @@ void BaseFile:: setName(string newName)
     name=newName;
 }
 
-virtual BaseFile:: ~BaseFile() {}
+BaseFile:: ~BaseFile() {}
 
 File:: File(string name, int size): BaseFile(name),size(size){}
 
-int File:: getSize()
+int File:: getSize() const
 {
     return size;
 }
 
 bool File:: isFile() {return true;}
 
-Directory::Directory(string name, Directory *parent):BaseFile(name),parent(parent)
-{
-    children=vector <BaseFile*>();
-}
+Directory::Directory(string name, Directory *parent):BaseFile(name),parent(parent),children() {}
 
 Directory:: ~Directory()
 {
@@ -37,14 +34,71 @@ void Directory:: clear()
     vector <BaseFile*> :: iterator myIt;
     for (myIt=getChildren().begin() ; myIt!=getChildren().end(); myIt++)
     {
-        delete (**myIt);
+        delete (*myIt);
     }
 
 }
 
-Directory::Directory(const Directory & other):BaseFile(other)
+Directory::Directory(Directory && other):BaseFile(other),children(other.getChildren()),parent(other.getParent())
 {
+    setName(other.getName());
+    other.setParent(nullptr);
+}
 
+Directory::Directory(const Directory & other):BaseFile(""),children(),parent(nullptr)
+{
+    setName((other.getName()));
+    vector <BaseFile*> :: iterator myIt;
+    for (myIt=(other.getChildren()).begin() ; myIt!=other.getChildren().end() ; myIt++)
+    {
+        if ((**myIt).isFile())
+        {
+            File * newFile = new File(other.getName(),other.getSize());
+            addFile(newFile);
+        }
+        else
+        {
+            Directory * newDirectory = new Directory ((Directory &)**myIt );
+            addFile(newDirectory);
+        }
+        setParent(other.getParent());
+    }
+}
+
+Directory & Directory:: operator=(const Directory & other)
+{
+    if (this==& other)
+        return *this;
+    else
+    {
+        clear();
+        setParent(other.getParent());
+        vector <BaseFile*> :: iterator myIt;
+        for (myIt=(other.getChildren()).begin() ; myIt!=other.getChildren().end() ; myIt++) {
+            if ((**myIt).isFile()) {
+                File *newFile = new File(other.getName(), other.getSize());
+                addFile(newFile);
+            } else {
+                Directory *newDirectory = new Directory((Directory &) **myIt);
+                addFile(newDirectory);
+            }
+            setParent(other.getParent());
+        }
+        return *this;
+    }
+}
+
+Directory & Directory:: operator=(Directory && other)
+{
+    if (this!=&other)
+    {
+        clear();
+        setParent(other.getParent());
+        children=other.getChildren();
+        setName(other.getName());
+        other.setParent(nullptr);
+    }
+    return *this;
 }
 
 Directory* Directory:: getParent() const
@@ -61,19 +115,15 @@ void Directory:: setParent(Directory *newParent)
 
 void Directory:: addFile(BaseFile* file)
 {
-    children.push_back(file);
-}
-
-void removeAll (Directory * target)
-{
     vector <BaseFile*> :: iterator myIt;
-    for (myIt=target->getChildren().begin() ; myIt!=target->getChildren().end() ; myIt++)
+    bool found=false;
+    for (myIt=getChildren().begin() ; myIt!=getChildren().end() && !found ; myIt++)
     {
-        if ((**myIt).isFile())
-            (target->removeFile(**myIt))
-        else
-            removeAll(**myIt);
+        if ((**myIt).getName().compare(file->getName())==0)
+            found=true;
     }
+    if (!found)
+    children.push_back(file);
 }
 
 void Directory:: removeFile(string name)
@@ -82,7 +132,7 @@ void Directory:: removeFile(string name)
     vector<BaseFile*>::iterator myIt;
     for(myIt=children.begin(); myIt!=children.end() ; myIt++,i++) {
         if ((**myIt).getName().compare(name)==0) {
-            delete (**myIt);
+            delete (*myIt);
             children.erase(children.begin() + i);
         }
     }
@@ -90,7 +140,7 @@ void Directory:: removeFile(string name)
 
 void Directory:: removeFile(BaseFile* file)
 {
-        delete *file;
+        delete file;
 }
 
 bool sortAlpha( BaseFile *a, BaseFile *b)
@@ -100,7 +150,10 @@ bool sortAlpha( BaseFile *a, BaseFile *b)
 
 bool sortSize( BaseFile *a, BaseFile *b)
 {
+    if ((*a).getSize()!=((*b).getSize()))
     return (((*a).getSize())<((*b).getSize()));
+    else
+    return (((*a).getName())<((*b).getName()));
 }
 
 void Directory:: sortByName()
@@ -111,14 +164,14 @@ void Directory:: sortBySize()
 {
     sort(children.begin(),children.end(),sortSize);
 }
-vector<BaseFile*> Directory:: getChildren()
+vector<BaseFile*> Directory:: getChildren() const
 {
     return children;
 }
-int Directory:: getSize()
+int Directory:: getSize() const
 {
     int output(0);
-    vector<BaseFile*>::iterator myIt;
+    vector<BaseFile*>::const_iterator myIt;
     for(myIt=children.begin(); myIt!=children.end() ; myIt++) {
         output=output+(**myIt).getSize();
     }

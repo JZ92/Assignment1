@@ -27,7 +27,7 @@ private:
 
 public:
 	File(string name, int size);
-	int getSize();
+	int getSize() const;
 	bool isFile();
 
 };
@@ -46,13 +46,16 @@ public:
 	void removeFile(BaseFile* file); // Remove the file from children
 	void sortByName(); // Sort children by name alphabetically (not recursively)
 	void sortBySize(); // Sort children by size (not recursively)
-	vector<BaseFile*> getChildren(); // Return children
-	int getSize(); // Return the size of the directory (recursively)
+	vector<BaseFile*> getChildren() const; // Return children
+	int getSize() const; // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
 	bool isFile();
 	~Directory();
 	void clear();
 	Directory(const Directory & other);
+	Directory & operator=(const Directory & other);
+	Directory(Directory && other);
+	Directory & operator=(Directory && other);
 };
 
 #endif

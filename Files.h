@@ -18,7 +18,7 @@ public:
 	void setName(string newName);
 	virtual int getSize() = 0;
 	virtual bool isFile() = 0;
-	virtual ~BaseFile();
+	virtual ~BaseFile()=0;
 };
 
 class File : public BaseFile {
@@ -27,7 +27,7 @@ private:
 
 public:
 	File(string name, int size);
-	int getSize() const;
+	int getSize();
 	bool isFile();
 
 };
@@ -46,8 +46,8 @@ public:
 	void removeFile(BaseFile* file); // Remove the file from children
 	void sortByName(); // Sort children by name alphabetically (not recursively)
 	void sortBySize(); // Sort children by size (not recursively)
-	vector<BaseFile*> getChildren() const; // Return children
-	int getSize() const; // Return the size of the directory (recursively)
+	vector<BaseFile*> getChildren(); // Return children
+	int getSize(); // Return the size of the directory (recursively)
 	string getAbsolutePath();  //Return the path from the root to this
 	bool isFile();
 	~Directory();

@@ -1,4 +1,6 @@
+#include <sstream>
 #include "../include/Commands.h"
+#include "../include/GlobalVariables.h"
 
 Directory * goTo (Directory * location, string args)
 {
@@ -21,11 +23,12 @@ Directory * goTo (Directory * location, string args)
         } else {
             vector<BaseFile *>::iterator myIt;
             bool found2 = false;
-            for (myIt = location->getChildren().begin();
-                 myIt != location->getChildren().end(); myIt++) {
-                if (sub.compare((**myIt).getName()) == 0 && !((**myIt).isFile()))
+            vector <BaseFile *> myChildren = location->getChildren();
+            for (myIt = myChildren.begin();
+                 myIt != myChildren.end(); myIt++) {
+                if (sub==(**myIt).getName() && !((**myIt).isFile()))
                 {
-                    location=(***myIt);
+                    location=(Directory *)(*myIt);
                     found2 = true;
                 }
             }
@@ -53,12 +56,12 @@ void PwdCommand:: execute(FileSystem & fs)
 {
     string path="/";
     vector <string> output;
-    Directory current=fs.getWorkingDirectory();
-    output.push_back(current.getName());
-    while (current.getParent()!= nullptr)
+    Directory * current=&fs.getWorkingDirectory();
+    output.push_back(current->getName());
+    while (current->getParent()!= nullptr)
     {
-        current=*(current.getParent());
-        output.push_back(current.getName());
+        current=(current->getParent());
+        output.push_back(current->getName());
     }
     vector<string>::reverse_iterator myIt;
     for (myIt=output.rbegin() ; myIt!=output.rend(); ++myIt)
@@ -82,7 +85,7 @@ void CdCommand:: execute(FileSystem & fs)
         else
         current=goTo((&fs.getWorkingDirectory()),args);
     if (current== nullptr)
-        cout << "The system cannot find the path specified";
+        cout << "The system cannot find the path specified" <<endl;
     else
         fs.setWorkingDirectory(current);
 }
@@ -96,35 +99,41 @@ void LsCommand:: execute(FileSystem & fs)
 {
     string args=getArgs();
     bool sortBySize=false;
-    if (args.size()>=4 && args.substr(0,4).compare("[-s]")==0)
+    if (args.size()>=2 && args.substr(0,2)=="-s")
     {
         sortBySize=true;
-        if (args!="[-s]")
-        args=args.substr(5);
+        if (args!="-s")
+        args=args.substr(3);
         else
             args="";
     }
 
     Directory * current;
-    if (args.at(0)=='/')
-        current=goTo((&fs.getRootDirectory()),args.substr(1));
-    else
-        current=goTo((&fs.getWorkingDirectory()),args);
-    if (current== nullptr)
-        cout << "The system cannot find the path specified";
+    if (args=="")
+        current=&fs.getWorkingDirectory();
+    else {
+        if (args.at(0) == '/')
+            current = goTo((&fs.getRootDirectory()), args.substr(1));
+        else
+            current = goTo((&fs.getWorkingDirectory()), args);
+    }
+        if (current == nullptr)
+            cout << "The system cannot find the path specified" << endl;
+
     else {
         if (sortBySize)
             (*current).sortBySize();
         else
             (*current).sortByName();
         vector<BaseFile *>::iterator printIt;
-        for (printIt = (*current).getChildren().begin(); printIt != (*current).getChildren().end(); printIt++) {
-            if ((**printIt).isFile())
-                cout << "FILE/t" << (**printIt).getName() << "/t" << (**printIt).getSize();
+            vector <BaseFile *> myChildren = ((Directory *)(current))->getChildren();
+        for (printIt = myChildren.begin(); printIt != myChildren.end(); printIt++) {
+            if ((*printIt)->isFile())
+                cout << "FILE\t" << (**printIt).getName() << "\t" << (**printIt).getSize();
             else
-            cout << "DIR/t" << (**printIt).getName() << "/t" << (**printIt).getSize();
+            cout << "DIR\t" << (**printIt).getName() << "\t" << (**printIt).getSize();
 
-            cout << "/n";
+            cout << endl;
         }
     }
 
@@ -134,7 +143,52 @@ void LsCommand:: execute(FileSystem & fs)
 
     MkdirCommand:: MkdirCommand(string args) : BaseCommand(args) {}
     void MkdirCommand:: execute(FileSystem & fs)
-    {}
+    {
+        string args=getArgs();
+        Directory * current;
+        if (args.at(0)=='/')
+        {
+            current=&fs.getRootDirectory();
+            args=args.substr(1);
+        } else
+            current=&fs.getWorkingDirectory();
+        istringstream ss(args);
+        string slash;
+        string curr;
+        int k,i;
+        vector <string> path;
+        while (getline(ss, slash, '/'))
+            path.insert(path.begin(), slash);
+        while (!path.empty())
+        {
+            curr=path.back();
+            path.pop_back();
+            bool found=false;
+            vector <BaseFile*> :: iterator myIt;
+            vector <BaseFile*> myChildren=current->getChildren();
+            for (myIt=myChildren.begin(), k=0 ; myIt!=myChildren.end() && !found; myIt++, k++)
+            {
+                if ((**myIt).getName()==curr)
+                {
+                    found=true;
+                    if (!(**myIt).isFile())
+                    {
+                        i=k;
+                        if (path.empty())
+                            cout << "The directory already exists" << endl;
+                        else
+                            current=((Directory *)(*myIt));
+                    }
+                }
+            }
+            if (!found)
+            {
+                current->addFile(new Directory(curr,current));
+                current= (Directory *)(current->getChildren().at(current->getChildren().size()-1));
+            }
+        }
+
+    }
     string MkdirCommand:: toString() {return "mkdir";}
 
     MkfileCommand:: MkfileCommand(string args) :BaseCommand(args) {}
@@ -147,37 +201,42 @@ void LsCommand:: execute(FileSystem & fs)
         string sizeW;
         int size;
         string path;
+        Directory * location;
         if (found!=-1)
         {
             sub=args.substr(found+1);
-            space=sub.find(' ');
-            sub=sub.substr(0,space);
-            sizeW=sub.substr(space+1);
-            size=atoi(sizeW.c_str());
+            space=args.find(' ');
+            sub=sub.substr(0,sub.find(' '));
+            sizeW=args.substr(space+1);
+            size=stoi(sizeW);
             path=args.substr(0,found);
+            if (args.at(0)=='/') {
+                if (path.size()!=0)
+                location = goTo((&fs.getRootDirectory()), path.substr(1));
+                else
+                    location=&fs.getRootDirectory();
+            }
+            else
+                location = goTo((&fs.getWorkingDirectory()),path);
         }
         else
         {
+            location=&fs.getWorkingDirectory();
             space=args.find_last_of(' ');
             sub=args.substr(0,space);
-            sizeW=sub.substr(space+1);
-            size=atoi(sizeW.c_str());
-            path=args.substr(0,space);
+            sizeW=args.substr(space+1);
+            size=stoi(sizeW);
         }
-        Directory * location;
-        if (args.at(0)=='/')
-            location = goTo((&fs.getRootDirectory()),path.substr(1));
-        else
-            location = goTo((&fs.getWorkingDirectory()),path);
         if (location==nullptr)
-            cout << "The system cannot find the path specified";
+            cout << "The system cannot find the path specified" << endl;
         else
         {
             vector <BaseFile*>:: iterator myIt;
+            vector <BaseFile*> myChildren=location->getChildren();
             bool found=false;
-            for(myIt=location->getChildren().begin(); myIt!=location->getChildren().end() && !found; myIt++)
+            for(myIt=myChildren.begin(); myIt!=myChildren.end() && !found; myIt++)
             {
-                if ((**myIt).getName().compare(sub) == 0)
+                if ((**myIt).getName()==sub)
                     found = true;
             }
             if (found)
@@ -206,7 +265,9 @@ void LsCommand:: execute(FileSystem & fs)
             Directory *location;
             Directory *location2;
             string fileName;
+            Directory * newDir;
             int size;
+            bool file;
             if (found == -1) {
                 name = sub1;
                 location = (& fs.getWorkingDirectory()  );
@@ -230,8 +291,12 @@ void LsCommand:: execute(FileSystem & fs)
                         if ((**myIt).isFile()) {
                             size = (**myIt).getSize();
                             fileName = (**myIt).getName();
-                        } else {
-                            //DIRECTORY
+                            file=true;
+                        }
+                        else
+                        {
+                            newDir = new Directory(*(Directory *)(*myIt));
+                            file=false;
                         }
                     }
                 }
@@ -254,8 +319,12 @@ void LsCommand:: execute(FileSystem & fs)
                             found2 = true;
                     }
                     if (!found2) {
-                        File *newFile = new File(fileName, size);
-                        location2->addFile(newFile);
+                        if (file) {
+                            File *newFile = new File(fileName, size);
+                            location2->addFile(newFile);
+                        }
+                        else
+                            location2->addFile(newDir);
                     }
                 }
             }
@@ -334,7 +403,19 @@ void LsCommand:: execute(FileSystem & fs)
                         }
                         else
                         {
-                            //DIRECTORY
+                            Directory * newDir = new Directory(*(Directory *)(*myIt));
+                            location->removeFile(newDir->getName());
+                            vector<BaseFile *>::iterator myIt2;
+                            bool found3 = false;
+                            for (myIt2 = location2->getChildren().begin();
+                                 myIt2 != location2->getChildren().end() && !found3; myIt2++) {
+                                if ((**myIt).getName().compare(name) == 0)
+                                    found3 = true;
+                            }
+                            if (!found3)
+                            {
+                                location2->addFile(newDir);
+                            }
                         }
                     }
                 }
@@ -385,7 +466,7 @@ void LsCommand:: execute(FileSystem & fs)
                         (**myIt).setName(name2);
                     else
                     {
-                        if((**myIt)==&fs.getWorkingDirectory())
+                        if((Directory *)(*myIt)==&fs.getWorkingDirectory())
                             cout << "Can't rename the working directory";
                         else
                             (**myIt).setName(name2);
@@ -454,7 +535,12 @@ void LsCommand:: execute(FileSystem & fs)
     VerboseCommand:: VerboseCommand(string args):BaseCommand(args) {}
     void VerboseCommand:: execute(FileSystem & fs)
     {
-
+        string args=getArgs();
+        int ver=stoi(args);
+        if (ver<0 || ver>3)
+            cout << "Wrong verbose input";
+        else
+            verbose=ver;
     }
     string VerboseCommand:: toString() {return "verbose";}
 

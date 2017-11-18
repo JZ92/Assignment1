@@ -1,6 +1,24 @@
 #include "../include/Environment.h"
+#include "../include/GlobalVariables.h"
 
-Environment:: Environment(): fs(),commandsHistory() {}
+Environment:: Environment(): fs(),commandsHistory() {
+    Directory *d1 = new Directory("dir1", &fs.getRootDirectory());
+    Directory *d2 = new Directory("dir2", &fs.getRootDirectory());
+    Directory *d3 = new Directory("dir3", &fs.getRootDirectory());
+    Directory *d4 = new Directory("dir4", &fs.getRootDirectory());
+    Directory *d5 = new Directory("dir5", d1);
+    Directory *d6 = new Directory("dir6", d1);
+
+    fs.getRootDirectory().addFile(d1);
+    fs.getRootDirectory().addFile(d2);
+    fs.getRootDirectory().addFile(d3);
+    fs.getRootDirectory().addFile(d4);
+    d1->addFile(d5);
+    d1->addFile(d6);
+    d1->addFile(new File("file4", 12));
+    d1->addFile(new File("file3", 12));
+
+}
 
 void Environment:: start()
 {
@@ -20,6 +38,10 @@ void Environment:: start()
             } else {
                 cmd = input.substr(0, space);
                 content = input.substr(space + 1);
+            }
+            if (verbose==2 || verbose==3)
+            {
+                cout << cmd << endl;
             }
             if (cmd == "pwd") {
                 PwdCommand temp(content);
@@ -115,7 +137,7 @@ void Environment:: start()
     }
 
 }
-FileSystem& Environment:: getFileSystem() const
+FileSystem& Environment:: getFileSystem()
 {
     return fs;
 }

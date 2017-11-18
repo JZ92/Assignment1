@@ -1,4 +1,5 @@
 #include "../include/Files.h"
+#include "../include/GlobalVariables.h"
 
 
 BaseFile::BaseFile(string name):name(name) {}
@@ -15,17 +16,21 @@ BaseFile:: ~BaseFile() {}
 
 File:: File(string name, int size): BaseFile(name),size(size){}
 
-int File:: getSize() const
+int File:: getSize()
 {
     return size;
 }
 
 bool File:: isFile() {return true;}
 
-Directory::Directory(string name, Directory *parent):BaseFile(name),parent(parent),children() {}
+Directory::Directory(string name, Directory *parent):BaseFile(name),children(),parent(parent) {}
 
 Directory:: ~Directory()
 {
+    if (verbose==1 || verbose==3)
+    {
+        cout <<"Directory:: ~Directory()" << endl;
+    }
     clear();
 }
 
@@ -41,19 +46,27 @@ void Directory:: clear()
 
 Directory::Directory(Directory && other):BaseFile(other),children(other.getChildren()),parent(other.getParent())
 {
+    if (verbose==1 || verbose==3)
+    {
+        cout <<"Directory::Directory(Directory && other)" << endl;
+    }
     setName(other.getName());
     other.setParent(nullptr);
 }
 
 Directory::Directory(const Directory & other):BaseFile(""),children(),parent(nullptr)
 {
+    if (verbose==1 || verbose==3)
+    {
+        cout <<"Directory::Directory(const Directory & other)" << endl;
+    }
     setName((other.getName()));
-    vector <BaseFile*> :: iterator myIt;
-    for (myIt=(other.getChildren()).begin() ; myIt!=other.getChildren().end() ; myIt++)
+    vector <BaseFile*> :: const_iterator myIt;
+    for (myIt=(other.children).begin() ; myIt!=other.children.end() ; myIt++)
     {
         if ((**myIt).isFile())
         {
-            File * newFile = new File(other.getName(),other.getSize());
+            File * newFile = new File(((File *)(*myIt))->getName(),((File *)(*myIt))->getSize());
             addFile(newFile);
         }
         else
@@ -67,16 +80,20 @@ Directory::Directory(const Directory & other):BaseFile(""),children(),parent(nul
 
 Directory & Directory:: operator=(const Directory & other)
 {
+    if (verbose==1 || verbose==3)
+    {
+        cout <<"Directory & Directory:: operator=(const Directory & other)" << endl;
+    }
     if (this==& other)
         return *this;
     else
     {
         clear();
         setParent(other.getParent());
-        vector <BaseFile*> :: iterator myIt;
-        for (myIt=(other.getChildren()).begin() ; myIt!=other.getChildren().end() ; myIt++) {
+        vector <BaseFile*> :: const_iterator myIt;
+        for (myIt=other.children.begin() ; myIt!=other.children.end() ; myIt++) {
             if ((**myIt).isFile()) {
-                File *newFile = new File(other.getName(), other.getSize());
+                File *newFile = new File(((File *)(*myIt))->getName(), (((File *)(*myIt))->getSize()));
                 addFile(newFile);
             } else {
                 Directory *newDirectory = new Directory((Directory &) **myIt);
@@ -90,6 +107,10 @@ Directory & Directory:: operator=(const Directory & other)
 
 Directory & Directory:: operator=(Directory && other)
 {
+    if (verbose==1 || verbose==3)
+    {
+        cout <<"Directory & Directory:: operator=(Directory && other)" << endl;
+    }
     if (this!=&other)
     {
         clear();
@@ -115,14 +136,14 @@ void Directory:: setParent(Directory *newParent)
 
 void Directory:: addFile(BaseFile* file)
 {
-    vector <BaseFile*> :: iterator myIt;
-    bool found=false;
-    for (myIt=getChildren().begin() ; myIt!=getChildren().end() && !found ; myIt++)
-    {
-        if ((**myIt).getName().compare(file->getName())==0)
-            found=true;
-    }
-    if (!found)
+//    vector <BaseFile*> :: iterator myIt;
+//    bool found=false;
+//    for (myIt=getChildren().begin() ; myIt!=getChildren().end() && !found ; myIt++)
+//    {
+//        if ((**myIt).getName()==file->getName())
+//            found=true;
+//    }
+//    if (!found)
     children.push_back(file);
 }
 
@@ -164,11 +185,11 @@ void Directory:: sortBySize()
 {
     sort(children.begin(),children.end(),sortSize);
 }
-vector<BaseFile*> Directory:: getChildren() const
+vector<BaseFile*> Directory:: getChildren()
 {
     return children;
 }
-int Directory:: getSize() const
+int Directory:: getSize()
 {
     int output(0);
     vector<BaseFile*>::const_iterator myIt;

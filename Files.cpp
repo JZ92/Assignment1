@@ -54,7 +54,7 @@ Directory::Directory(Directory && other):BaseFile(other),children(other.getChild
     other.setParent(nullptr);
 }
 
-Directory::Directory(const Directory & other):BaseFile(""),children(),parent(nullptr)
+Directory::Directory(const Directory & other):BaseFile(""),children(),parent(other.getParent())
 {
     if (verbose==1 || verbose==3)
     {
@@ -66,15 +66,13 @@ Directory::Directory(const Directory & other):BaseFile(""),children(),parent(nul
     {
         if ((**myIt).isFile())
         {
-            File * newFile = new File(((File *)(*myIt))->getName(),((File *)(*myIt))->getSize());
-            addFile(newFile);
+            children.push_back(new File(((File *)(*myIt))->getName(),((File *)(*myIt))->getSize()));
         }
         else
         {
-            Directory * newDirectory = new Directory ((Directory &)**myIt );
-            addFile(newDirectory);
+            children.push_back(new Directory (*((Directory *)(*myIt))));
+            ((Directory *)children.back())->parent=this;
         }
-        setParent(other.getParent());
     }
 }
 
@@ -131,37 +129,36 @@ Directory* Directory:: getParent() const
 
 void Directory:: setParent(Directory *newParent)
 {
+    parent->removeFile(this);
     parent=newParent;
+    newParent->addFile(this);
 }
 
 void Directory:: addFile(BaseFile* file)
 {
-//    vector <BaseFile*> :: iterator myIt;
-//    bool found=false;
-//    for (myIt=getChildren().begin() ; myIt!=getChildren().end() && !found ; myIt++)
-//    {
-//        if ((**myIt).getName()==file->getName())
-//            found=true;
-//    }
-//    if (!found)
     children.push_back(file);
 }
 
 void Directory:: removeFile(string name)
 {
-    int i(0);
     vector<BaseFile*>::iterator myIt;
-    for(myIt=children.begin(); myIt!=children.end() ; myIt++,i++) {
-        if ((**myIt).getName().compare(name)==0) {
-            delete (*myIt);
-            children.erase(children.begin() + i);
-        }
+    for(myIt=children.begin(); myIt!=children.end();) {
+        if ((**myIt).getName()==name) {
+            children.erase(myIt);
+        } else
+            myIt++;
     }
 }
 
 void Directory:: removeFile(BaseFile* file)
 {
-        delete file;
+    vector<BaseFile*>::iterator myIt;
+    for(myIt=children.begin(); myIt!=children.end();) {
+        if ((*myIt)==file) {
+            children.erase(myIt);
+        } else
+            myIt++;
+    }
 }
 
 bool sortAlpha( BaseFile *a, BaseFile *b)

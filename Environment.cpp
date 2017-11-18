@@ -44,93 +44,93 @@ void Environment:: start()
                 cout << cmd << endl;
             }
             if (cmd == "pwd") {
-                PwdCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                PwdCommand * temp = new PwdCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "cd") {
-                CdCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                CdCommand * temp = new CdCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "ls") {
-                LsCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                LsCommand * temp= new LsCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "mkdir") {
-                MkdirCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                MkdirCommand * temp = new MkdirCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "mkfile") {
-                MkfileCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                MkfileCommand * temp = new MkfileCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "cp") {
-                CpCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                CpCommand * temp = new CpCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "mv") {
-                MvCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                MvCommand * temp = new MvCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "rename") {
-                RenameCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                RenameCommand * temp = new RenameCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "rm") {
-                RmCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                RmCommand * temp = new RmCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "history") {
-                HistoryCommand temp(content, commandsHistory);
-                temp.execute(fs);
-                addToHistory(&temp);
+                HistoryCommand * temp = new HistoryCommand(content, commandsHistory);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "verbose") {
-                VerboseCommand temp(content);
-                temp.execute(fs);
-                addToHistory(&temp);
+                VerboseCommand * temp = new VerboseCommand(content);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (cmd == "exec") {
-                ExecCommand temp(content, commandsHistory);
-                temp.execute(fs);
-                addToHistory(&temp);
+                ExecCommand * temp = new ExecCommand(content, commandsHistory);
+                temp->execute(fs);
+                addToHistory(temp);
                 legal = true;
             }
 
             if (!legal) {
-                ErrorCommand temp(input);
-                temp.execute(fs);
-                addToHistory(&temp);
+                ErrorCommand * temp = new ErrorCommand(input);
+                temp->execute(fs);
+                addToHistory(temp);
             }
         }
 
@@ -145,7 +145,7 @@ void Environment:: addToHistory(BaseCommand *command)
 {
     commandsHistory.push_back(command);
 }
-const vector<BaseCommand*>& Environment:: getHistory() const
+const vector<BaseCommand*>& Environment:: getHistory()
 {
     return commandsHistory;
 }

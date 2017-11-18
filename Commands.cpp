@@ -13,7 +13,6 @@ Directory * goTo (Directory * location, string args)
             sub=args;
         else
             sub = args.substr(0, found);
-
         if (sub == "..") {
             if (location->getParent() == nullptr) {
                 return nullptr;
@@ -70,7 +69,7 @@ void PwdCommand:: execute(FileSystem & fs)
         path.append("/");
     }
     path.pop_back();
-    cout << path;
+    cout << path << endl;
 }
 string PwdCommand:: toString() { return "pwd"; }
 
@@ -81,11 +80,15 @@ void CdCommand:: execute(FileSystem & fs)
     string args=getArgs();
     Directory * current;
     if (args.at(0)=='/')
-        current=goTo((&fs.getRootDirectory()),args.substr(1));
+    {
+        current = goTo((&fs.getRootDirectory()), args.substr(1));
+    }
         else
-        current=goTo((&fs.getWorkingDirectory()),args);
+    {
+        current = goTo((&fs.getWorkingDirectory()), args);
+    }
     if (current== nullptr)
-        cout << "The system cannot find the path specified" <<endl;
+        cout << "The system cannot find the path specified" << endl;
     else
         fs.setWorkingDirectory(current);
 }
@@ -283,10 +286,11 @@ void LsCommand:: execute(FileSystem & fs)
             if (location == nullptr)
                 cout << "The system cannot find the path specified";
             else {
-                vector<BaseFile *>::iterator myIt;
                 bool found = false;
-                for (myIt = location->getChildren().begin(); myIt != location->getChildren().end() && !found; myIt++) {
-                    if ((**myIt).getName().compare(name) == 0) {
+                vector <BaseFile*>:: iterator myIt;
+                vector <BaseFile*> myChildren=location->getChildren();
+                for (myIt = myChildren.begin(); myIt != myChildren.end() && !found; myIt++) {
+                    if ((**myIt).getName()==name) {
                         found = true;
                         if ((**myIt).isFile()) {
                             size = (**myIt).getSize();
@@ -311,11 +315,14 @@ void LsCommand:: execute(FileSystem & fs)
                 if (location2 == nullptr)
                     cout << "The system cannot find the path specified";
                 else {
+                    if (!file)
+                    {newDir->setParent(location2);}
                     vector<BaseFile *>::iterator myIt;
                     bool found2 = false;
-                    for (myIt = location2->getChildren().begin();
-                         myIt != location2->getChildren().end() && !found2; myIt++) {
-                        if ((**myIt).getName().compare(name) == 0)
+                    vector <BaseFile*> myChildren=location2->getChildren();
+                    for (myIt = myChildren.begin();
+                         myIt != myChildren.end() && !found2; myIt++) {
+                        if ((**myIt).getName()==name)
                             found2 = true;
                     }
                     if (!found2) {
@@ -333,8 +340,8 @@ void LsCommand:: execute(FileSystem & fs)
         string CpCommand:: toString() {return "cp";}
 
     MvCommand:: MvCommand(string args): BaseCommand(args) {}
-    void MvCommand:: execute(FileSystem & fs)
-    {
+    void MvCommand:: execute(FileSystem & fs) {
+
         string args = getArgs();
         size_t space = args.find(' ');
         string sub1 = args.substr(0, space);
@@ -344,11 +351,11 @@ void LsCommand:: execute(FileSystem & fs)
         string path2;
         Directory *location;
         Directory *location2;
-        string fileName;
-        int size;
+        bool flag = false;
+        BaseFile *toCopy;
         if (found == -1) {
             name = sub1;
-            location = (& fs.getWorkingDirectory()  );
+            location = (&fs.getWorkingDirectory());
         } else {
             name = sub1.substr(found + 1);
             path1 = sub1.substr(0, found);
@@ -357,74 +364,135 @@ void LsCommand:: execute(FileSystem & fs)
             else
                 location = goTo(&fs.getWorkingDirectory(), path1);
         }
-        path2=args.substr(space+1);
-        if (path2.at(0)=='/')
-            location2=goTo(&fs.getRootDirectory(),path2.substr(1));
+        path2 = args.substr(space + 1);
+        if (path2.at(0) == '/')
+            location2 = goTo(&fs.getRootDirectory(), path2.substr(1));
         else
-            location2=goTo(&fs.getWorkingDirectory(),path2);
-        if (location==nullptr || location2==nullptr)
-            cout << "The system cannot find the path specified";
+            location2 = goTo(&fs.getWorkingDirectory(), path2);
+        if (location == nullptr || location2 == nullptr)
+            cout << "The system cannot find the path specified" << endl;
         else {
-            Directory *current = &fs.getWorkingDirectory();
-            bool flag=false;
-            while (current->getParent()!=nullptr && !flag)
-            {
-                if (current==location) {
-                    cout << "Can't move directory";
-                    flag=true;
+            bool found = false;
+            vector<BaseFile *>::iterator myIt;
+            vector<BaseFile *> myChildren = location->getChildren();
+            for (myIt = myChildren.begin();
+                 myIt != myChildren.end() && !found; myIt++) {
+                if ((**myIt).getName() == name) {
+                    found = true;
+                    toCopy = (**myIt);
                 }
-                current=current->getParent();
             }
-            if (!flag)
-            {
-                vector<BaseFile *>::iterator myIt;
-                bool found2 = false;
-                for (myIt = location->getChildren().begin();
-                     myIt != location->getChildren().end() && !found2; myIt++) {
-                    if ((**myIt).getName().compare(name) == 0) {
-                        found2 = true;
-                        if((**myIt).isFile())
-                        {
-                            fileName=(**myIt).getName();
-                            size=(**myIt).getSize();
-                            File * newFile = new File(fileName,size);
-                            location->removeFile(fileName);
-                            vector<BaseFile *>::iterator myIt2;
-                            bool found3 = false;
-                            for (myIt2 = location2->getChildren().begin();
-                                 myIt2 != location2->getChildren().end() && !found3; myIt2++) {
-                                if ((**myIt).getName().compare(name) == 0)
-                                    found3 = true;
-                            }
-                            if (!found3)
-                            {
-                                location2->addFile(newFile);
-                            }
-                        }
-                        else
-                        {
-                            Directory * newDir = new Directory(*(Directory *)(*myIt));
-                            location->removeFile(newDir->getName());
-                            vector<BaseFile *>::iterator myIt2;
-                            bool found3 = false;
-                            for (myIt2 = location2->getChildren().begin();
-                                 myIt2 != location2->getChildren().end() && !found3; myIt2++) {
-                                if ((**myIt).getName().compare(name) == 0)
-                                    found3 = true;
-                            }
-                            if (!found3)
-                            {
-                                location2->addFile(newDir);
-                            }
-                        }
+            if (!found)
+                cout << "The system cannot find the path specified" << endl;
+            else {
+                vector<BaseFile *>::iterator myIt2;
+                bool sameName=false;
+                vector<BaseFile *> myChildren2 = location2->getChildren();
+                for (myIt2 = myChildren2.begin();
+                     myIt != myChildren2.end() && !found; myIt++) {
+                    if ((**myIt2).getName() == name) {
+                        sameName = true;
                     }
                 }
-                if (!found2)
-                    cout << "No such file or directory";
+                if (sameName)
+                    cout << "Cannot move this file";
+                else {
+
+                    if (!(toCopy->isFile())) {
+                    Directory *current2 = location2;
+                    bool flag2 = false;
+                    while (current2 != nullptr && !flag2) {
+                        if (current2 == location) {
+                            flag2 = true;
+                        }
+                        current2 = current2->getParent();
+                    }
+                        if (flag2)
+                            cout << "Can't move directory" << endl;
+                        else {
+
+
+
+                    }
+                }
+
             }
 
         }
+    }
 
+
+                vector<BaseFile *>::iterator myIt;
+                bool found2 = false;
+                vector <BaseFile*> myChildren=location->getChildren();
+                for (myIt = myChildren.begin();
+                     myIt != myChildren.end() && !found2; myIt++) {
+                    if ((**myIt).getName()==name) {
+                        found2 = true;
+                        if((**myIt).isFile())
+//                        {
+//                            fileName=(**myIt).getName();
+//                            size=(**myIt).getSize();
+//                            File * newFile = new File(fileName,size);
+//                            location->removeFile(fileName);
+//                            vector<BaseFile *>::iterator myIt2;
+//                            bool found3 = false;
+//                            vector <BaseFile*> myChildren2=location2->getChildren();
+//                            for (myIt2 = myChildren2.begin();
+//                                 myIt2 != myChildren2.end() && !found3; myIt2++) {
+//                                if ((**myIt).getName()==name)
+//                                    found3 = true;
+//                            }
+//                            if (!found3)
+//                            {
+//                                location2->addFile(newFile);
+//                            }
+//                        }
+//                        else
+//                        {
+//                            Directory *current = &fs.getWorkingDirectory();
+//                            bool flag=false;
+//                            while (current->getParent()!=nullptr && !flag)
+//                            {
+//                                if (current==location ) {
+//                                    cout << "Can't move directory" << endl;
+//                                    flag=true;
+//                                    found2=true;
+//                                }
+//                                current=current->getParent();
+//                            }
+                            Directory * current2 = location2;
+                            while (current2!=nullptr && !flag)
+                            {
+                                if (current2==location ) {
+                                    cout << "Can't move directory" << endl;
+                                    flag=true;
+                                    found2= true;
+                                }
+                                current2=current2->getParent();
+                                if (!flag) {
+//                                    Directory *newDir = new Directory(*(Directory *) (*myIt));
+//                                    location->removeFile(newDir->getName());
+//                                    vector<BaseFile *>::iterator myIt2;
+//                                    bool found3 = false;
+//                                    vector<BaseFile *> myChildren3 = location2->getChildren();
+//                                    for (myIt2 = myChildren3.begin();
+//                                         myIt2 != myChildren3.end() && !found3; myIt2++) {
+//                                        if ((**myIt).getName() == name)
+//                                            found3 = true;
+//                                    }
+//                                    if (!found3) {
+//                                        location2->addFile(newDir);
+//                                    }
+//                                }
+//                        }
+//                    }
+//                }
+//                if (!found2)
+//                    cout << "No such file or directory" << endl;
+//            }
+//
+//        }
     }
 
     string MvCommand:: toString() {return "mv";}
@@ -446,21 +514,26 @@ void LsCommand:: execute(FileSystem & fs)
         } else {
             name1 = sub1.substr(found + 1);
             path = sub1.substr(0, found);
-            if (path.at(0) == '/')
-                location = goTo(&fs.getRootDirectory(), path);
-            else
-                location = goTo(&fs.getWorkingDirectory(), path);
+            if (path=="")
+                location=&fs.getRootDirectory();
+            else {
+                if (path.at(0) == '/')
+                    location = goTo(&fs.getRootDirectory(), path);
+                else
+                    location = goTo(&fs.getWorkingDirectory(), path);
+            }
         }
         name2=args.substr(space+1);
         if (location==nullptr)
-            cout << "No such file or directory";
+            cout << "No such file or directory" << endl;
         else
         {
             vector<BaseFile *>::iterator myIt;
             bool found = false;
-            for (myIt = location->getChildren().begin();
-                 myIt != location->getChildren().end() && !found; myIt++) {
-                if ((**myIt).getName().compare(name1) == 0) {
+            vector <BaseFile*> myChildren=location->getChildren();
+            for (myIt = myChildren.begin();
+                 myIt != myChildren.end() && !found; myIt++) {
+                if ((**myIt).getName()==name1) {
                     found=true;
                     if ((**myIt).isFile())
                         (**myIt).setName(name2);
@@ -526,8 +599,7 @@ void LsCommand:: execute(FileSystem & fs)
         int i(0);
         for (myIt=history.begin() ; myIt!=history.end() ; myIt++, i++)
         {
-            cout << i << "/t" << (**myIt).toString() << " " << (**myIt).getArgs();
-            cout << "/n";
+            cout << i << "\t" << (*myIt)->toString() << "\t"  << (*myIt)->getArgs() << endl;
         }
     }
     string HistoryCommand:: toString() {return "history";}
@@ -551,7 +623,7 @@ void LsCommand:: execute(FileSystem & fs)
         size_t space = args.find(' ');
         if (space!=-1)
             args=args.substr(0,space);
-        cout << args << ": Unknown command";
+        cout << args << ": Unknown command" << endl;
     }
     string ErrorCommand:: toString() {return "error";}
 

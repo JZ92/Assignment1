@@ -1,0 +1,49 @@
+verbose 2
+******************************* 0 *******************************
+mkdir b
+mkdir c
+mkdir a
+mkfile f1 1000
+mkfile f2 500
+ls
+cd a
+mkfile f3 100
+mkfile f4 300
+ls
+cd ..
+ls -s
+************************ 1 *******************************
+mv a/f4 b
+ls
+ls a
+ls b
+************************* 2 ********************************
+mkdir c/d/e/f
+mkfile c/d/d1 1000
+mkfile c/d/e/e1 1000
+ls -s
+************************* 3 ********************************
+mv c/d a
+ls
+ls a
+cd a/d
+ls
+ls e
+************************* 4 ********************************
+cd /
+ls
+rm a
+ls
+************************** Errors section ******************************
+cd z
+ls z
+mkdir b
+mkfile z/newfile 1234
+mkfile f1 5678
+cp z a
+mv z a
+rename z z2
+rm z
+rm /
+exec 1000000
+exit

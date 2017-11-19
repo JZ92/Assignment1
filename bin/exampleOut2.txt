@@ -1,0 +1,152 @@
+/>/>******************************* 0 *******************************
+*******************************: Unknown command
+/>mkdir d1
+/>mkdir d2
+/>mkdir d3
+/>cd d1
+/d1>mkdir d11
+/d1>mkdir d12
+/d1>cd ../d2
+/d2>mkdir d21
+/d2>mkdir d22
+/d2>mkdir d23
+/d2>******************************* 1 *******************************
+*******************************: Unknown command
+/d2>cd ..
+/>mkfile rf1 100
+/>mkfile rf2 100
+/>mkfile rf3 50
+/>cd d1
+/d1>mkfile d1f1 1000
+/d1>mkfile d1f2 2000
+/d1>mkfile d1f3 30
+/d1>cd /d2/d21
+/d2/d21>mkfile d21f1 1
+/d2/d21>mkfile d21f2 2
+/d2/d21>pwd
+/d2/d21
+/d2/d21>******************************* cd *******************************
+*******************************: Unknown command
+/d2/d21>cd /
+/>ls -s
+DIR	d3	0
+DIR	d2	3
+FILE	rf3	50
+FILE	rf1	100
+FILE	rf2	100
+DIR	d1	3030
+/>cd d1/d11
+/d1/d11>cd ../../d2
+/d2>cd /d2/d21/d31
+The system cannot find the path specified
+/d2>******************************* ls *******************************
+*******************************: Unknown command
+/d2>cd /
+/>ls -s
+DIR	d3	0
+DIR	d2	3
+FILE	rf3	50
+FILE	rf1	100
+FILE	rf2	100
+DIR	d1	3030
+/>ls d1/d11
+/>ls -s ../../d2
+The system cannot find the path specified
+/>ls /d2/d21/d31
+The system cannot find the path specified
+/>******************************* mkdir *******************************
+*******************************: Unknown command
+/>cd /
+/>ls -s
+DIR	d3	0
+DIR	d2	3
+FILE	rf3	50
+FILE	rf1	100
+FILE	rf2	100
+DIR	d1	3030
+/>mkdir /d1/d11
+The directory already exists
+/>mkdir d2/d21/d21f1
+The directory already exists
+/>mkdir d2/d21/d21f1/d211
+The directory already exists
+/>ls d2/d21
+FILE	d21f1	1
+FILE	d21f2	2
+/>mkdir d4/d41
+/>ls d4
+DIR	d41	0
+/>******************************* mkfile *******************************
+*******************************: Unknown command
+/>cd /
+/>ls -s
+DIR	d3	0
+DIR	d4	0
+DIR	d2	3
+FILE	rf3	50
+FILE	rf1	100
+FILE	rf2	100
+DIR	d1	3030
+/>mkfile d4/d41/d41f1 500
+/>mkfile d4/d41/d41f1 500
+File already exists
+/>ls d4/d41
+FILE	d41f1	500
+/>mkfile /d4/d42/d41f2 400
+The system cannot find the path specified
+/>ls d4/d42
+The system cannot find the path specified
+/>******************************* cp *******************************
+*******************************: Unknown command
+/>cd /
+/>ls -s
+DIR	d3	0
+DIR	d2	3
+FILE	rf3	50
+FILE	rf1	100
+FILE	rf2	100
+DIR	d4	500
+DIR	d1	3030
+/>cp rf1 d1
+/>ls d1
+DIR	d11	0
+DIR	d12	0
+FILE	d1f1	1000
+FILE	d1f2	2000
+FILE	d1f3	30
+FILE	rf1	100
+/>cp d1/rf1 d2
+/>ls d2
+DIR	d21	3
+DIR	d22	0
+DIR	d23	0
+FILE	rf1	100
+/>cp d1/rf999 d2
+No such file or directory
+/>ls d2
+DIR	d21	3
+DIR	d22	0
+DIR	d23	0
+FILE	rf1	100
+/>cp d999 d2
+No such file or directory
+/>ls d2
+DIR	d21	3
+DIR	d22	0
+DIR	d23	0
+FILE	rf1	100
+/>cp d1 d4
+/>ls d4
+DIR	d1	3130
+DIR	d41	500
+/>cp d1 d999
+No such file or directory
+/>ls
+DIR	d1	3130
+DIR	d2	103
+DIR	d3	0
+DIR	d4	3630
+FILE	rf1	100
+FILE	rf2	100
+FILE	rf3	50
+/>

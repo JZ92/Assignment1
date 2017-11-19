@@ -1,0 +1,109 @@
+/>/>******************************* 0 *******************************
+*******************************: Unknown command
+/>mkdir b
+/>mkdir c
+/>mkdir a
+/>mkfile f1 1000
+/>mkfile f2 500
+/>ls
+DIR	a	0
+DIR	b	0
+DIR	c	0
+FILE	f1	1000
+FILE	f2	500
+/>cd a
+/a>mkfile f3 100
+/a>mkfile f4 300
+/a>ls
+FILE	f3	100
+FILE	f4	300
+/a>cd ..
+/>ls -s
+DIR	b	0
+DIR	c	0
+DIR	a	400
+FILE	f2	500
+FILE	f1	1000
+/>************************ 1 *******************************
+************************: Unknown command
+/>mv a/f4 b
+/>ls
+DIR	a	100
+DIR	b	300
+DIR	c	0
+FILE	f1	1000
+FILE	f2	500
+/>ls a
+FILE	f3	100
+/>ls b
+FILE	f4	300
+/>************************* 2 ********************************
+*************************: Unknown command
+/>mkdir c/d/e/f
+/>mkfile c/d/d1 1000
+/>mkfile c/d/e/e1 1000
+/>ls -s
+DIR	a	100
+DIR	b	300
+FILE	f2	500
+FILE	f1	1000
+DIR	c	2000
+/>************************* 3 ********************************
+*************************: Unknown command
+/>mv c/d a
+/>ls
+DIR	a	2100
+DIR	b	300
+DIR	c	0
+FILE	f1	1000
+FILE	f2	500
+/>ls a
+DIR	d	2000
+FILE	f3	100
+/>cd a/d
+/a/d>ls
+FILE	d1	1000
+DIR	e	1000
+/a/d>ls e
+FILE	e1	1000
+DIR	f	0
+/a/d>************************* 4 ********************************
+*************************: Unknown command
+/a/d>cd /
+/>ls
+DIR	a	2100
+DIR	b	300
+DIR	c	0
+FILE	f1	1000
+FILE	f2	500
+/>rm a
+/>ls
+DIR	b	300
+DIR	c	0
+FILE	f1	1000
+FILE	f2	500
+/>************************** Errors section ******************************
+**************************: Unknown command
+/>cd z
+The system cannot find the path specified
+/>ls z
+The system cannot find the path specified
+/>mkdir b
+The directory already exists
+/>mkfile z/newfile 1234
+The system cannot find the path specified
+/>mkfile f1 5678
+File already exists
+/>cp z a
+No such file or directory
+/>mv z a
+No such file or directory
+/>rename z z2
+No such file or directory
+/>rm z
+No such file or directory
+/>rm /
+Can't remove directory
+/>exec 1000000
+Command not found
+/>

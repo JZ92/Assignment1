@@ -1,0 +1,75 @@
+verbose 2
+******************************* 0 *******************************
+mkdir d1
+mkdir d2
+mkdir d3
+cd d1
+mkdir d11
+mkdir d12
+cd ../d2
+mkdir d21
+mkdir d22
+mkdir d23
+******************************* 1 *******************************
+cd ..
+mkfile rf1 100
+mkfile rf2 100
+mkfile rf3 50
+cd d1
+mkfile d1f1 1000
+mkfile d1f2 2000
+mkfile d1f3 30
+cd /d2/d21
+mkfile d21f1 1
+mkfile d21f2 2
+pwd
+******************************* cd *******************************
+cd /
+ls -s
+cd d1/d11
+cd ../../d2
+cd /d2/d21/d31
+******************************* ls *******************************
+cd /
+ls -s
+ls d1/d11
+ls -s ../../d2
+ls /d2/d21/d31
+******************************* mkdir *******************************
+cd /
+ls -s
+mkdir /d1/d11
+mkdir d2/d21/d21f1
+mkdir d2/d21/d21f1/d211
+ls d2/d21
+mkdir d4/d41
+ls d4
+******************************* mkfile *******************************
+cd /
+ls -s
+mkfile d4/d41/d41f1 500
+mkfile d4/d41/d41f1 500
+ls d4/d41
+mkfile /d4/d42/d41f2 400
+ls d4/d42
+******************************* cp *******************************
+cd /
+ls -s
+cp rf1 d1
+ls d1
+cp d1/rf1 d2
+ls d2
+cp d1/rf999 d2
+ls d2
+cp d999 d2
+ls d2
+cp d1 d4
+ls d4
+cp d1 d999
+ls
+exit
+
+
+
+
+

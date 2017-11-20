@@ -29,22 +29,20 @@ void FileSystem:: clear()
     delete workingDirectory;
     delete rootDirectory;
 }
-FileSystem::FileSystem(const FileSystem & other)
+FileSystem::FileSystem(const FileSystem & other): rootDirectory(new Directory (* other.rootDirectory)), workingDirectory()
 {
     if (verbose==1 || verbose==3)
     {
         cout <<"FileSystem::FileSystem(const FileSystem & other)" << endl;
     }
     Directory * current =  other.workingDirectory ;
-    Directory * newRoot = new Directory (* other.rootDirectory);
-    rootDirectory=newRoot;
     vector <string> path;
     while (current->getParent()!=nullptr)
     {
         path.push_back(current->getName());
         current=current->getParent();
     }
-    current=newRoot;
+    current=other.rootDirectory;
     vector <BaseFile*> :: iterator myIt;
     while (!path.empty())
     {
@@ -58,14 +56,12 @@ FileSystem::FileSystem(const FileSystem & other)
     setWorkingDirectory(current);
 }
 
-FileSystem:: FileSystem(FileSystem && other)
+FileSystem:: FileSystem(FileSystem && other): rootDirectory(&other.getRootDirectory()), workingDirectory(&other.getWorkingDirectory())
 {
     if (verbose==1 || verbose==3)
     {
         cout <<"FileSystem:: FileSystem(FileSystem && other)" << endl;
     }
-    setWorkingDirectory(&other.getWorkingDirectory());
-    rootDirectory=(&other.getRootDirectory());
 }
 FileSystem & FileSystem:: operator=(FileSystem && other)
 {

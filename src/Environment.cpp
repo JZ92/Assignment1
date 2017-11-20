@@ -1,7 +1,7 @@
 #include "../include/Environment.h"
 #include "../include/GlobalVariables.h"
 
-Environment:: Environment(): fs(),commandsHistory() {}
+Environment:: Environment(): fs(), commandsHistory() {}
 
 void Environment:: start()
 {
@@ -146,7 +146,7 @@ Environment ::~Environment()
     clear();
 }
 
-Environment:: Environment(const Environment &other): commandsHistory(),fs()
+Environment:: Environment(const Environment &other): fs(), commandsHistory()
 {
     vector<BaseCommand*>::const_iterator myIt;
     for( myIt= other.commandsHistory.begin();
@@ -156,7 +156,7 @@ Environment:: Environment(const Environment &other): commandsHistory(),fs()
     }
     fs = *(new FileSystem(other.getFileSystem()));
 }
-Environment:: Environment(Environment &&other): commandsHistory(),fs() {
+Environment:: Environment(Environment &&other): fs(), commandsHistory() {
     commandsHistory = other.commandsHistory;
     fs = other.getFileSystem();
     other.commandsHistory.clear();

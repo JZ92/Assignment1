@@ -176,15 +176,18 @@ void LsCommand:: execute(FileSystem & fs)
             vector <BaseFile*> myChildren=current->getChildren();
             for (myIt=myChildren.begin() ; myIt!=myChildren.end() && !found; myIt++)
             {
-                if ((**myIt).getName()==curr)
-                {
-                    found=true;
-                    if (!(**myIt).isFile())
-                    {
+                if ((**myIt).getName()==curr) {
+                    found = true;
+                    if (!(**myIt).isFile()) {
                         if (path.empty())
                             cout << "The directory already exists" << endl;
                         else
-                            current=((Directory *)(*myIt));
+                            current = ((Directory *) (*myIt));
+                    }
+                    else
+                    {
+                        cout << "The directory already exists" << endl;
+                        path.clear();
                     }
                 }
             }
@@ -317,7 +320,7 @@ void LsCommand:: execute(FileSystem & fs)
                 else
                     location2 = goTo(&fs.getWorkingDirectory(), path2);
                 if (location2 == nullptr)
-                    cout << "The system cannot find the path specified" << endl;
+                    cout << "No such file or directory" << endl;
                 else {
                     if (!file) { newDir->setParent(location2); }
                     vector<BaseFile *>::iterator myIt;

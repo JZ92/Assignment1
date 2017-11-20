@@ -11,8 +11,9 @@ using namespace std;
 
 class Environment {
 private:
+    FileSystem fs;
 	vector<BaseCommand*> commandsHistory;
-	FileSystem fs;
+
 
 public:
 	Environment();

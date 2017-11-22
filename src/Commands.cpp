@@ -209,13 +209,16 @@ void LsCommand:: execute(FileSystem & fs)
         string sub;
         size_t space;
         string sizeW;
-        int size;
+        int size=-1;
         string path;
         Directory * location;
+        space=args.find(' ');
+        if (space!=-1)
+        {
         if (found!=-1)
         {
             sub=args.substr(found+1);
-            space=args.find(' ');
+            if (space!=-1)
             sub=sub.substr(0,sub.find(' '));
             sizeW=args.substr(space+1);
             size=stoi(sizeW);
@@ -229,35 +232,30 @@ void LsCommand:: execute(FileSystem & fs)
             else
                 location = goTo((&fs.getWorkingDirectory()),path);
         }
-        else
-        {
-            location=&fs.getWorkingDirectory();
-            space=args.find_last_of(' ');
-            sub=args.substr(0,space);
-            sizeW=args.substr(space+1);
-            size=stoi(sizeW);
-        }
-        if (location==nullptr)
-            cout << "The system cannot find the path specified" << endl;
-        else
-        {
-            vector <BaseFile*>:: iterator myIt;
-            vector <BaseFile*> myChildren=location->getChildren();
-            bool found=false;
-            for(myIt=myChildren.begin(); myIt!=myChildren.end() && !found; myIt++)
-            {
-                if ((**myIt).getName()==sub)
-                    found = true;
+        else {
+            location = &fs.getWorkingDirectory();
+            sub = args.substr(0, space);
+            sizeW = args.substr(space + 1);
+            size = stoi(sizeW);
             }
-            if (found)
-                cout << "File already exists" << endl;
-            else
-            {
-                File * newFile=new File(sub,size);
-                location->addFile(newFile);
+            if (location == nullptr)
+                cout << "The system cannot find the path specified" << endl;
+            else {
+                vector<BaseFile *>::iterator myIt;
+                vector<BaseFile *> myChildren = location->getChildren();
+                bool found = false;
+                for (myIt = myChildren.begin(); myIt != myChildren.end() && !found; myIt++) {
+                    if ((**myIt).getName() == sub)
+                        found = true;
+                }
+                if (found)
+                    cout << "File already exists" << endl;
+                else {
+                    File *newFile = new File(sub, size);
+                    location->addFile(newFile);
+                }
             }
         }
-
     }
 
     string MkfileCommand:: toString() {return "mkfile";}
@@ -542,7 +540,7 @@ void LsCommand:: execute(FileSystem & fs)
                         while(current!=nullptr && legal)
                         {
                             if(current==(*myIt)) {
-                                cout << "No such file or directory" << endl;
+                                cout << "Can't remove file or directory" << endl;
                                 legal = false;
                             }
                             current=current->getParent();
